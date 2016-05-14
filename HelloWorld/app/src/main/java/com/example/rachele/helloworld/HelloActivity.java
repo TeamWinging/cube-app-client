@@ -37,10 +37,9 @@ import java.util.Map;
 
 public class HelloActivity extends AppCompatActivity {
 
-    TextView buttonAnswer;
+
     TextView sendResponse;
-    EditText x;
-    EditText y;
+
     String stopID;
     String stopName;
     ArrayList<String> tramsInStop = new ArrayList<String>();
@@ -65,9 +64,6 @@ public class HelloActivity extends AppCompatActivity {
 
         sendResponse = (TextView) findViewById(R.id.textView3);
 
-
-       // createSpinTrams();
-
         autocompleteStops = (AutoCompleteTextView) findViewById(R.id.autoCompleteStops);
 
         autocompleteStops.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -81,17 +77,10 @@ public class HelloActivity extends AppCompatActivity {
                 getStopID(stopName);
 
                 String t = "Stop: " + stopName + ", id: " + stopID;
-                buttonAnswer.setText(t);
+
 
             }
         });
-
-        buttonAnswer = (TextView) findViewById(R.id.button_answer);
-
-        Button sendButton = (Button) findViewById(R.id.send_button);
-
-        x = (EditText) findViewById(R.id.x_pos);
-        y = (EditText) findViewById(R.id.y_pos);
 
 
 
@@ -126,7 +115,7 @@ public class HelloActivity extends AppCompatActivity {
         // Create an ArrayAdapter using the string array and a default spinner layout
         Collections.sort(tramsInStop);
         ArrayAdapter<String> adapterSpinner = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, tramsInStop);
+                R.layout.spinner_layout, tramsInStop);
 
 // Specify the layout to use when the list of choices appears
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -294,19 +283,6 @@ public class HelloActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void clickSend(View view) {
-        //String text = getStopID("Brunnsparken");
-        //buttonAnswer.setText("Button clicked!\nValues: x = " + x.getText() + " y = " + y.getText());
-        //buttonAnswer.setText(text);
-        post(x.getText().toString(), y.getText().toString());
-
-        ArrayList<String> stops = getStops("Brunn");
-        System.out.println("SIZE = " + stops.size());
-        for (String s : stops) {
-            System.out.println(s);
-        }
-
-    }
 
     public void getStopID (String stop) {
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -512,7 +488,7 @@ public class HelloActivity extends AppCompatActivity {
 
     private void postTravel() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://172.";
+        String url = "http://172.25.36.179:9000/trams";
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>()
                 {
