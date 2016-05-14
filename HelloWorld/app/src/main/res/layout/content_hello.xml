@@ -73,5 +73,24 @@
             android:layout_height="wrap_content"
             android:id="@+id/tram_spinner"
             android:spinnerMode="dropdown" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/direction_spinner"
+            android:spinnerMode="dropdown" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send settings to CUBE"
+            android:id="@+id/send_settings"
+            android:onClick="clickSendTravel"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/textView3" />
     </LinearLayout>
 </RelativeLayout>

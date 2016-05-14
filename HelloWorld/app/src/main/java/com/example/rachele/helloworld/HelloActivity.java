@@ -39,15 +39,21 @@ import java.util.Map;
 public class HelloActivity extends AppCompatActivity {
 
     TextView buttonAnswer;
+    TextView sendResponse;
     EditText x;
     EditText y;
     String stopID;
     String stopName;
     ArrayList<String> tramsInStop = new ArrayList<String>();
     String chosenTram;
-    String[] directions;
+    String chosenDirection;
+    ArrayList<String> directions = new ArrayList<String>();
     AutoCompleteTextView autocompleteStops;
     Spinner tramSpinner;
+    Spinner directionSpinner;
+    boolean createdSpinTramsHasRun = false;
+    boolean createSpinDirectionsHasRun = false;
+    Button sendTravel;
 
 
     @Override
@@ -56,8 +62,12 @@ public class HelloActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hello);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        sendTravel = (Button) findViewById(R.id.send_settings);
 
-        createSpinTrams();
+        sendResponse = (TextView) findViewById(R.id.textView3);
+
+
+       // createSpinTrams();
 
         autocompleteStops = (AutoCompleteTextView) findViewById(R.id.autoCompleteStops);
 
@@ -112,6 +122,7 @@ public class HelloActivity extends AppCompatActivity {
     }
 
     private void createSpinTrams() {
+        System.out.println("CREATE SPIN TRAM");
         tramSpinner = (Spinner) findViewById(R.id.tram_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         Collections.sort(tramsInStop);
@@ -128,7 +139,40 @@ public class HelloActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int pos, long id) {
                 // An item was selected. You can retrieve the selected item using
-                System.out.println(parent.getItemAtPosition(pos));
+//                tramSpinner.setSelection(pos);
+                System.out.println("here " +parent.getItemAtPosition(pos));
+//                chosenTram = "";
+                chosenTram = (String) parent.getItemAtPosition(pos);
+                getDirections(stopID, chosenTram);
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+        });
+    }
+
+    private void createSpinDirections() {
+        System.out.println("CREATE SPIN DIRECTIONS");
+        directionSpinner = (Spinner) findViewById(R.id.direction_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<String> adapterSpinnerDirections = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, directions);
+
+// Specify the layout to use when the list of choices appears
+        adapterSpinnerDirections.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+        directionSpinner.setAdapter(adapterSpinnerDirections);
+
+        directionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+//                tramSpinner.setSelection(pos);
+                System.out.println("here " +parent.getItemAtPosition(pos));
+//                chosenTram = "";
+                chosenDirection = (String) parent.getItemAtPosition(pos);
+
             }
             public void onNothingSelected(AdapterView<?> parent) {
                 // Another interface callback
@@ -321,6 +365,7 @@ public class HelloActivity extends AppCompatActivity {
     }
 
     public void getTrams(String stopID) {
+//        System.out.println("GET TRAMS");
 
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = "https://api.vasttrafik.se/bin/rest.exe/v1/departureBoard?format=json&authKey=6511154616&maxDeparturesPerLine=1&timeSpan=60&id=" + stopID;
@@ -349,7 +394,86 @@ public class HelloActivity extends AppCompatActivity {
                                     System.out.println(t);
                                 }
                             }
-                            createSpinTrams();
+                            if(!createdSpinTramsHasRun) {
+//                                System.out.println("Something");
+                                createSpinTrams();
+                                createdSpinTramsHasRun = true;
+                            }
+
+
+//                            System.out.println("STOP " + stopL.toString());
+
+
+                        } catch (Exception e) {
+                            //do something
+                            System.err.println("ERROR" + e.getMessage());
+                            e.printStackTrace();
+                        }
+//                        Log.d("Response", response.toString());
+
+
+                    }
+
+
+
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //error
+                    }
+                }
+        );
+
+
+
+        // add it to the RequestQueue
+        queue.add(getRequest);
+
+
+    }
+
+
+
+    public void getDirections(String stopID, String tram) {
+        final String tram2 = tram;
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = "https://api.vasttrafik.se/bin/rest.exe/v1/departureBoard?format=json&authKey=6511154616&maxDeparturesPerLine=1&timeSpan=60&id=" + stopID;
+
+        // prepare the Request
+        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>()
+                {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // display response
+                        JSONObject depB;
+                        JSONArray dep;
+                        try {
+//                            System.out.println("IN THE TRY");
+                            depB = response.getJSONObject("DepartureBoard");
+                            dep =depB.getJSONArray("Departure");
+                            directions.clear();
+
+                            for (int i = 0; i < dep.length(); i++) {
+                                JSONObject stop = (JSONObject) dep.get(i);
+                                String t = (String) stop.get("name");
+
+                                if (t.equalsIgnoreCase(tram2)) {
+                                    String d = (String) stop.get("direction");
+                                    if (!directions.contains(d)) {
+                                        directions.add(d);
+                                        System.out.println(d);
+                                    }
+                                }
+
+                            }
+                            if(!createSpinDirectionsHasRun) {
+                                createSpinDirections();
+                                createSpinDirectionsHasRun = true;
+                            }
+//                            createSpinTrams();
 //                            System.out.println("STOP " + stopL.toString());
 
 
@@ -381,6 +505,10 @@ public class HelloActivity extends AppCompatActivity {
 
     }
 
+    public void clickSendTravel(View v) {
+        sendResponse.setText("Stop: " + stopName +"\n" + "Tram/Bus: " + chosenTram + "\n" + "Direction: " + chosenDirection);
+
+    }
 
 
 
