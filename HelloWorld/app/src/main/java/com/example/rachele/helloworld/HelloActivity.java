@@ -240,7 +240,7 @@ public class HelloActivity extends AppCompatActivity {
 
     private void post(final String xString, final String yString) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://192.168.1.102";
+        String url = "http://172.";
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>()
                 {
@@ -507,7 +507,45 @@ public class HelloActivity extends AppCompatActivity {
 
     public void clickSendTravel(View v) {
         sendResponse.setText("Stop: " + stopName +"\n" + "Tram/Bus: " + chosenTram + "\n" + "Direction: " + chosenDirection);
+        postTravel();
 
+    }
+
+    private void postTravel() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "http://172.";
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>()
+                {
+                    @Override
+                    public void onResponse(String response) {
+                        // response
+                        Log.d("Response", response);
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("stopName", stopName);
+                params.put("stopID", stopID);
+                params.put("chosenTram", chosenTram);
+                params.put("chosenDir", chosenDirection);
+
+                return params;
+            }
+        };
+        queue.add(postRequest);
+        System.out.println("TRAVEL REQUEST PUTTED");
     }
 
 
