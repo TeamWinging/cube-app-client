@@ -67,5 +67,11 @@
             android:id="@+id/autoCompleteStops"
             android:layout_gravity="center_horizontal"
             android:hint="Type your stop" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tram_spinner"
+            android:spinnerMode="dropdown" />
     </LinearLayout>
 </RelativeLayout>

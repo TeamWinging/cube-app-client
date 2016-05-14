@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,8 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +47,7 @@ public class HelloActivity extends AppCompatActivity {
     String chosenTram;
     String[] directions;
     AutoCompleteTextView autocompleteStops;
+    Spinner tramSpinner;
 
 
     @Override
@@ -53,6 +57,8 @@ public class HelloActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        createSpinTrams();
+
         autocompleteStops = (AutoCompleteTextView) findViewById(R.id.autoCompleteStops);
 
         autocompleteStops.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -61,6 +67,7 @@ public class HelloActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View arg1, int pos,
                                     long id) {
                 stopName = (String) parent.getItemAtPosition(pos);
+                tramsInStop.clear();
 
                 getStopID(stopName);
 
@@ -102,6 +109,31 @@ public class HelloActivity extends AppCompatActivity {
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stops);
         textView.setAdapter(adapter);
 
+    }
+
+    private void createSpinTrams() {
+        tramSpinner = (Spinner) findViewById(R.id.tram_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        Collections.sort(tramsInStop);
+        ArrayAdapter<String> adapterSpinner = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, tramsInStop);
+
+// Specify the layout to use when the list of choices appears
+        adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+        tramSpinner.setAdapter(adapterSpinner);
+
+        tramSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+                System.out.println(parent.getItemAtPosition(pos));
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+        });
     }
 
     private ArrayList<String> getStops(String input) {
@@ -291,7 +323,7 @@ public class HelloActivity extends AppCompatActivity {
     public void getTrams(String stopID) {
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "https://api.vasttrafik.se/bin/rest.exe/v1/departureBoard?format=json&authKey=6511154616&id=" + stopID;
+        final String url = "https://api.vasttrafik.se/bin/rest.exe/v1/departureBoard?format=json&authKey=6511154616&maxDeparturesPerLine=1&timeSpan=60&id=" + stopID;
 
         // prepare the Request
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -306,15 +338,18 @@ public class HelloActivity extends AppCompatActivity {
 //                            System.out.println("IN THE TRY");
                             depB = response.getJSONObject("DepartureBoard");
                             dep =depB.getJSONArray("Departure");
+
                             for (int i = 0; i < dep.length(); i++) {
                                 JSONObject stop = (JSONObject) dep.get(i);
                                 String t = (String) stop.get("name");
+
 
                                 if (!tramsInStop.contains(t)) {
                                     tramsInStop.add(t);
                                     System.out.println(t);
                                 }
                             }
+                            createSpinTrams();
 //                            System.out.println("STOP " + stopL.toString());
 
 
